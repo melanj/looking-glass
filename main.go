@@ -1,14 +1,30 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"golang.org/x/oauth2/github"
+
+	"github.com/dgrijalva/jwt-go"
 	"net"
 	"net/http"
 	"os/exec"
 	"strconv"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"golang.org/x/oauth2"
+)
+
+var (
+	config = oauth2.Config{
+		ClientID:     "<client_id>",
+		ClientSecret: "<client_secret>",
+		Scopes:       []string{"all"},
+		RedirectURL:  "http://<host>/login/oauth2",
+		Endpoint: github.Endpoint,
+	}
 )
 
 func main() {
@@ -17,15 +33,43 @@ func main() {
 
 	fmt.Println("Looking Glass for FRRouting/Quagga v.1")
 	e := echo.New()
-	e.GET("/api/v1/ping", ping)
-	e.GET("/api/v1/traceroute", traceroute)
-	e.GET("/api/v1/mtr", mtr)
-	e.GET("/api/v1/bgpSummary", bgpSummary)
-	e.GET("/api/v1/routeV4", routeV4)
-	e.GET("/api/v1/routeV6", routeV6)
-	e.Use(middleware.JWT(signingKey))
+	e.GET("/login/oauth2", authorize)
+	g := e.Group("/api/v1")
+	g.GET("/ping", ping)
+	g.GET("/traceroute", traceroute)
+	g.GET("/mtr", mtr)
+	g.GET("/bgpSummary", bgpSummary)
+	g.GET("/routeV4", routeV4)
+	g.GET("/routeV6", routeV6)
+	g.Use(middleware.JWT(signingKey))
+	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(2)))
 	e.HideBanner = true
 	e.Logger.Fatal(e.Start(":8080"))
+}
+
+func authorize(c echo.Context) error {
+
+	code := c.QueryParam("code")
+
+	_, err := config.Exchange(context.Background(), code)
+	if err != nil {
+		return echo.ErrUnauthorized
+	}
+	token := jwt.New(jwt.SigningMethodHS256)
+
+	claims := token.Claims.(jwt.MapClaims)
+	claims["name"] = "Guest"
+	claims["admin"] = false
+	claims["exp"] = time.Now().Add(time.Hour * 4).Unix()
+
+	t, err := token.SignedString([]byte("secret"))
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"token": t,
+	})
 }
 
 func ping(c echo.Context) error {
