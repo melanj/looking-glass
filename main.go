@@ -1,9 +1,9 @@
 package main
 
 import (
-	"context"
+	"encoding/json"
 	"fmt"
-	"golang.org/x/oauth2/github"
+	"io/ioutil"
 
 	"github.com/dgrijalva/jwt-go"
 	"net"
@@ -14,18 +14,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"golang.org/x/oauth2"
 )
 
-var (
-	config = oauth2.Config{
-		ClientID:     "<client_id>",
-		ClientSecret: "<client_secret>",
-		Scopes:       []string{"all"},
-		RedirectURL:  "http://<host>/login/oauth2",
-		Endpoint: github.Endpoint,
-	}
-)
 
 func main() {
 
@@ -33,7 +23,8 @@ func main() {
 
 	fmt.Println("Looking Glass for FRRouting/Quagga v.1")
 	e := echo.New()
-	e.GET("/login/oauth2", authorize)
+	e.Static("/", "static")
+	e.POST("/login", authorize)
 	g := e.Group("/api/v1")
 	g.GET("/ping", ping)
 	g.GET("/traceroute", traceroute)
@@ -48,17 +39,29 @@ func main() {
 }
 
 func authorize(c echo.Context) error {
+	code := c.FormValue("token")
 
-	code := c.QueryParam("code")
+	tr := &http.Transport{}
+	client := &http.Client{Transport: tr}
+	req, _ := http.NewRequest("GET", "https://api.github.com/user", nil)
+	req.Header.Set("Authorization", fmt.Sprintf("token %s", code))
+	resp, err := client.Do(req)
 
-	_, err := config.Exchange(context.Background(), code)
 	if err != nil {
-		return echo.ErrUnauthorized
+		return err
 	}
-	token := jwt.New(jwt.SigningMethodHS256)
 
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+
+	var userInfo map[string]interface{}
+	if err = json.Unmarshal(body, &userInfo); err != nil {
+		return err
+	}
+
+	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["name"] = "Guest"
+	claims["name"] = userInfo["name"]
 	claims["admin"] = false
 	claims["exp"] = time.Now().Add(time.Hour * 4).Unix()
 
