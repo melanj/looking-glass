@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/github"
+	"github.com/dgrijalva/jwt-go"
 	"io/ioutil"
 
-	"github.com/dgrijalva/jwt-go"
 	"net"
 	"net/http"
 	"os/exec"
@@ -16,6 +19,15 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
+var (
+	config = oauth2.Config{
+		ClientID:     "<client_id>",
+		ClientSecret: "<client_secret>",
+		Scopes:       []string{"all"},
+		RedirectURL:  "http://localhost:8080/login.html",
+		Endpoint: github.Endpoint,
+	}
+)
 
 func main() {
 
@@ -24,7 +36,7 @@ func main() {
 	fmt.Println("Looking Glass for FRRouting/Quagga v.1")
 	e := echo.New()
 	e.Static("/", "static")
-	e.POST("/login", authorize)
+	e.GET("login/oauth2", authorize)
 	g := e.Group("/api/v1")
 	g.GET("/ping", ping)
 	g.GET("/traceroute", traceroute)
@@ -39,12 +51,18 @@ func main() {
 }
 
 func authorize(c echo.Context) error {
-	code := c.FormValue("token")
+
+	code := c.QueryParam("code")
+
+	oauthToken, err := config.Exchange(context.Background(), code)
+	if err != nil {
+		return echo.ErrUnauthorized
+	}
 
 	tr := &http.Transport{}
 	client := &http.Client{Transport: tr}
 	req, _ := http.NewRequest("GET", "https://api.github.com/user", nil)
-	req.Header.Set("Authorization", fmt.Sprintf("token %s", code))
+	req.Header.Set("Authorization", fmt.Sprintf("token %s", oauthToken.AccessToken))
 	resp, err := client.Do(req)
 
 	if err != nil {

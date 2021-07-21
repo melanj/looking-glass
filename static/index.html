@@ -1,27 +1,43 @@
+<!DOCTYPE html>
 <html>
-  <header>
-    <link  rel="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<head>
+    <META HTTP-EQUIV="Access-Control-Allow-Origin" CONTENT="*">
+    <META HTTP-EQUIV="X-Frame-Options" CONTENT="ALLOW-FROM *">
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-    <script src="https://cdn.rawgit.com/oauth-io/oauth-js/c5af4519/dist/oauth.js"></script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="bootstrap-social.css">
-  </header>
+    <script crossorigin="anonymous" language="JavaScript">
+        const OAUTH_URL = 'https://github.com/login/oauth/authorize?';
+        const SCOPE = 'OK';
+        const CLIENT_ID = '<client_id>';
+        const REDIRECT = 'http://localhost:8080/login.html';
+        const TYPE = 'token';
+        const _url = OAUTH_URL + 'scope=' + SCOPE + '&client_id=' + CLIENT_ID + '&redirect_uri=' + REDIRECT + '&response_type=' + TYPE;
+        let loginWindow;
+        window.authSuccess = false;
 
-  <body>
-    <a id="github-button" class="btn btn-block btn-social btn-github">
-      <i class="fa fa-github"></i> Sign in with Github
-    </a>
+        function login() {
+            window.authSuccess = false;
+            loginWindow = window.open(_url, "login", 'width=800, height=600');
 
-    <script>
-      $('#github-button').on('click', function() {
+            const pollTimer = window.setInterval(function () {
+                try {
+                    if (window.authSuccess) {
+                        window.clearInterval(pollTimer);
+                        console.log("login done ");
+                        loginWindow.close();
+                    }
+                } catch (e) {
+                    console.log("error ", e);
+                }
+            }, 500);
+        }
 
-        OAuth.initialize('<public_ip>');
-        OAuth.popup('github').then(github => {
-          console.log(github);
-          // Retrieves user data from oauth provider
-          console.log(github.me());
-        });
-      })
     </script>
-  </body>
+</head>
+
+<body>
+<a href='#' onClick='login();' id='loginText'> Click here to login </a>
+
+<div id='uName'></div>
+<img src='' id='imgHolder'/>
+</body>
 </html>
