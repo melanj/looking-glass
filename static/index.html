@@ -3,7 +3,9 @@
 <head>
     <META HTTP-EQUIV="Access-Control-Allow-Origin" CONTENT="*">
     <META HTTP-EQUIV="X-Frame-Options" CONTENT="ALLOW-FROM *">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script crossorigin="anonymous" language="JavaScript">
         const OAUTH_URL = 'https://github.com/login/oauth/authorize?';
         const SCOPE = 'OK';
@@ -12,7 +14,23 @@
         const TYPE = 'token';
         const _url = OAUTH_URL + 'scope=' + SCOPE + '&client_id=' + CLIENT_ID + '&redirect_uri=' + REDIRECT + '&response_type=' + TYPE;
         let loginWindow;
+        window.jwt = '';
         window.authSuccess = false;
+
+        $(function () {
+            $("#tools").tabs();
+            $("#ping_cmd").click(function (event) {
+                event.preventDefault();
+                $.ajax({
+                    url: "http://localhost:8080/api/v1/ping?ip=" + $('#ping_ip').val(),
+                    headers: {"Authorization": "Bearer " + window.jwt}
+                }).done(function (data) {
+                    $("#ping_results").html("<pre>" + data + "</pre>");
+                }).fail(function () {
+                    alert("error: " + data);
+                })
+            });
+        });
 
         function login() {
             window.authSuccess = false;
@@ -22,8 +40,10 @@
                 try {
                     if (window.authSuccess) {
                         window.clearInterval(pollTimer);
-                        console.log("login done ");
                         loginWindow.close();
+                        $(".unauthenticated").hide()
+                        $(".authenticated").show()
+                        $("#user").html(parseJwt(window.jwt)['name']);
                     }
                 } catch (e) {
                     console.log("error ", e);
@@ -31,13 +51,51 @@
             }, 500);
         }
 
+        function logout() {
+            window.authSuccess = false;
+            window.jwt = '';
+            $(".authenticated").hide();
+            $(".unauthenticated").show();
+        }
+
+        function parseJwt(token) {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            return JSON.parse(jsonPayload);
+        }
+
     </script>
 </head>
 
 <body>
-<a href='#' onClick='login();' id='loginText'> Click here to login </a>
-
-<div id='uName'></div>
-<img src='' id='imgHolder'/>
+<div class="container unauthenticated">
+    <a href='#' onClick='login();' id='loginText'> Click here to login with Github</a>
+</div>
+<div class="container authenticated" style="display: none">
+    Logged in as: <span id="user"></span> <a href='#' onClick='logout();' id='logoutText'>logout</a>
+    <div id="tools">
+        <ul>
+            <li><a href="#ping">Ping</a></li>
+            <li><a href="#traceroute">Traceroute</a></li>
+        </ul>
+        <div id="ping">
+            <p>Shows how long it takes for packets to reach host</p>
+            <p>IP : <input type="textbox" value="" id="ping_ip"></p>
+            <button class="ui-button ui-widget ui-corner-all" id="ping_cmd">Go</button>
+            <p>
+                <span>Results</span>
+            <div id="ping_results">
+            </div>
+            </p>
+        </div>
+        <div id="traceroute">
+            <p>Traces the route of packets to destination host from our server</p>
+        </div>
+    </div>
+</div>
 </body>
 </html>

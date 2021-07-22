@@ -35,17 +35,22 @@ func main() {
 
 	fmt.Println("Looking Glass for FRRouting/Quagga v.1")
 	e := echo.New()
+
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 	e.Static("/", "static")
 	e.GET("login/oauth2", authorize)
+
 	g := e.Group("/api/v1")
+	g.Use(middleware.JWT(signingKey))
+	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(2)))
 	g.GET("/ping", ping)
 	g.GET("/traceroute", traceroute)
 	g.GET("/mtr", mtr)
 	g.GET("/bgpSummary", bgpSummary)
 	g.GET("/routeV4", routeV4)
 	g.GET("/routeV6", routeV6)
-	g.Use(middleware.JWT(signingKey))
-	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(2)))
+
 	e.HideBanner = true
 	e.Logger.Fatal(e.Start(":8080"))
 }

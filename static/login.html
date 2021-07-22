@@ -7,7 +7,11 @@
 
     $.get("http://localhost:8080/login/oauth2?code=" + code, function(data, status){
         if(status === 'success') {
+            window.opener.jwt = data['token'];
             window.opener.authSuccess = true;
         }
     });
 </script>
+<body>
+<h4>Authentication successful, please wait while your requested page loads.</h4>
+</body>
