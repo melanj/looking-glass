@@ -20,16 +20,32 @@
             $("#tools").tabs();
             $("#ping_cmd").click(function (event) {
                 event.preventDefault();
-                $.ajax({
-                    url: CONFIG.get('BASE_URL') + "/api/v1/ping?ip=" + $('#ping_ip').val(),
-                    headers: {"Authorization": "Bearer " + window.jwt}
-                }).done(function (data) {
-                    $("#ping_results").html("<pre>" + data + "</pre>");
-                }).fail(function (data) {
-                    alert("error: " + data);
-                })
+                const ping_url = CONFIG.get('BASE_URL') + "/api/v1/ping?ip=" + $('#ping_ip').val();
+                getAndShowResults(ping_url, '#ping_results');
+            });
+            $("#traceroute_cmd").click(function (event) {
+                event.preventDefault();
+                const ping_url = CONFIG.get('BASE_URL') + "/api/v1/traceroute?ip=" + $('#traceroute_ip').val();
+                getAndShowResults(ping_url, '#traceroute_results');
+            });
+            $("#mtr_cmd").click(function (event) {
+                event.preventDefault();
+                const ping_url = CONFIG.get('BASE_URL') + "/api/v1/mtr?ip=" + $('#mtr_ip').val();
+                getAndShowResults(ping_url, '#mtr_results');
             });
         });
+
+        function getAndShowResults(ping_url, result) {
+            $(result).html("<pre>pending</pre>");
+            $.ajax({
+                url: ping_url,
+                headers: {"Authorization": "Bearer " + window.jwt}
+            }).done(function (data) {
+                $(result).html("<pre>" + data + "</pre>");
+            }).fail(function (data) {
+                alert("error: " + data);
+            });
+        }
 
         function login() {
             window.authSuccess = false;
@@ -80,6 +96,7 @@
         <ul>
             <li><a href="#ping">Ping</a></li>
             <li><a href="#traceroute">Traceroute</a></li>
+            <li><a href="#mtr">My Traceroute</a></li>
         </ul>
         <div id="ping">
             <p>Shows how long it takes for packets to reach host</p>
@@ -93,6 +110,23 @@
         </div>
         <div id="traceroute">
             <p>Traces the route of packets to destination host from our server</p>
+            <p>IP : <input type="textbox" value="" id="traceroute_ip"></p>
+            <button class="ui-button ui-widget ui-corner-all" id="traceroute_cmd">Go</button>
+            <p>
+                <span>Results</span>
+            <div id="traceroute_results">
+            </div>
+            </p>
+        </div>
+        <div id="mtr">
+            <p>Mtr is a network diagnostic tool that combines ping and traceroute into one program</p>
+            <p>IP : <input type="textbox" value="" id="mtr_ip"></p>
+            <button class="ui-button ui-widget ui-corner-all" id="mtr_cmd">Go</button>
+            <p>
+                <span>Results</span>
+            <div id="mtr_results">
+            </div>
+            </p>
         </div>
     </div>
 </div>
