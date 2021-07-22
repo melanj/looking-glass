@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 	"io/ioutil"
 
 	"net"
@@ -43,7 +43,7 @@ func main() {
 
 	g := e.Group("/api/v1")
 	g.Use(middleware.JWT(signingKey))
-	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(2)))
+	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(10)))
 	g.GET("/ping", ping)
 	g.GET("/traceroute", traceroute)
 	g.GET("/mtr", mtr)
