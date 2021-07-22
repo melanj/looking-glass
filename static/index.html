@@ -6,13 +6,12 @@
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="config.js"></script>
     <script crossorigin="anonymous" language="JavaScript">
-        const OAUTH_URL = 'https://github.com/login/oauth/authorize?';
-        const SCOPE = 'OK';
-        const CLIENT_ID = '<client_id>';
-        const REDIRECT = 'http://localhost:8080/login.html';
+        const SCOPE = 'user:read';
         const TYPE = 'token';
-        const _url = OAUTH_URL + 'scope=' + SCOPE + '&client_id=' + CLIENT_ID + '&redirect_uri=' + REDIRECT + '&response_type=' + TYPE;
+        const _url = CONFIG.get('OAUTH_URL') + '?scope=' + SCOPE + '&client_id=' + CONFIG.get('CLIENT_ID')
+            + '&redirect_uri=' + CONFIG.get('AUTH_REDIRECT') + '&response_type=' + TYPE;
         let loginWindow;
         window.jwt = '';
         window.authSuccess = false;
@@ -22,11 +21,11 @@
             $("#ping_cmd").click(function (event) {
                 event.preventDefault();
                 $.ajax({
-                    url: "http://localhost:8080/api/v1/ping?ip=" + $('#ping_ip').val(),
+                    url: CONFIG.get('BASE_URL') + "/api/v1/ping?ip=" + $('#ping_ip').val(),
                     headers: {"Authorization": "Bearer " + window.jwt}
                 }).done(function (data) {
                     $("#ping_results").html("<pre>" + data + "</pre>");
-                }).fail(function () {
+                }).fail(function (data) {
                     alert("error: " + data);
                 })
             });
