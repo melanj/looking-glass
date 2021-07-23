@@ -21,6 +21,9 @@
             <li><a href="#ping">Ping</a></li>
             <li><a href="#traceroute">Traceroute</a></li>
             <li><a href="#mtr">My Traceroute</a></li>
+            <li><a href="#bgpsum">BGP summary</a></li>
+            <li><a href="#route">Route</a></li>
+            <li><a href="#routev6">Route IPv6</a></li>
         </ul>
         <div id="ping">
             <p>Shows how long it takes for packets to reach host</p>
@@ -49,6 +52,35 @@
             <p>
                 <span>Results</span>
             <div id="mtr_results">
+            </div>
+            </p>
+        </div>
+        <div id="bgpsum">
+            <p>Display BGP summary information</p>
+            <button class="ui-button ui-widget ui-corner-all" id="bgpsum_cmd">Go</button>
+            <p>
+                <span>Results</span>
+            <div id="bgpsum_results">
+            </div>
+            </p>
+        </div>
+        <div id="route">
+            <p>BGP routing table entry for given IP address</p>
+            <p>IP : <input type="textbox" value="" id="route_ip"></p>
+            <button class="ui-button ui-widget ui-corner-all" id="route_cmd">Go</button>
+            <p>
+                <span>Results</span>
+            <div id="route_results">
+            </div>
+            </p>
+        </div>
+        <div id="routev6">
+            <p>BGP routing table entry for given IPv6 address</p>
+            <p>IP : <input type="textbox" value="" id="routev6_ip"></p>
+            <button class="ui-button ui-widget ui-corner-all" id="routev6_cmd">Go</button>
+            <p>
+                <span>Results</span>
+            <div id="routev6_results">
             </div>
             </p>
         </div>

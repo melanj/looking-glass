@@ -23,6 +23,21 @@ $(function () {
         const ping_url = CONFIG.get('BASE_URL') + "/api/v1/mtr?ip=" + $('#mtr_ip').val();
         getAndShowResults(ping_url, '#mtr_results');
     });
+    $("#bgpsum_cmd").click(function (event) {
+        event.preventDefault();
+        const ping_url = CONFIG.get('BASE_URL') + "/api/v1/bgp-summary";
+        getAndShowResults(ping_url, '#bgpsum_results');
+    });
+    $("#route_cmd").click(function (event) {
+        event.preventDefault();
+        const ping_url = CONFIG.get('BASE_URL') + "/api/v1/route?ip=" + $('#route_ip').val();
+        getAndShowResults(ping_url, '#route_results');
+    });
+    $("#routev6_cmd").click(function (event) {
+        event.preventDefault();
+        const ping_url = CONFIG.get('BASE_URL') + "/api/v1/route-v6?ip=" + $('#routev6_ip').val();
+        getAndShowResults(ping_url, '#routev6_results');
+    });
 });
 
 function getAndShowResults(ping_url, result) {

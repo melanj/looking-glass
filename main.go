@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/golang-jwt/jwt"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
-	"github.com/golang-jwt/jwt"
 	"io/ioutil"
 
 	"net"
@@ -47,9 +47,9 @@ func main() {
 	g.GET("/ping", ping)
 	g.GET("/traceroute", traceroute)
 	g.GET("/mtr", mtr)
-	g.GET("/bgpSummary", bgpSummary)
-	g.GET("/routeV4", routeV4)
-	g.GET("/routeV6", routeV6)
+	g.GET("/bgp-summary", bgpSummary)
+	g.GET("/route", routeV4)
+	g.GET("/route-v6", routeV6)
 
 	e.HideBanner = true
 	e.Logger.Fatal(e.Start(":8080"))
@@ -146,7 +146,7 @@ func routeV6(c echo.Context) error {
 	if net.ParseIP(IP) == nil {
 		return c.String(http.StatusBadRequest, fmt.Sprintf("IP Address: %s - Invalid", IP))
 	}
-	args := fmt.Sprintf("vtysh -c 'show ipv6 bgp %s'", IP)
+	args := fmt.Sprintf("vtysh -c 'show ip bgp ipv6 %s'", IP)
 	return c.String(http.StatusOK, exeCmd(c, args))
 }
 
