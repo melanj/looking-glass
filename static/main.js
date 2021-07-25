@@ -48,7 +48,8 @@ function getAndShowResults(ping_url, result) {
     }).done(function (data) {
         $(result).html("<pre>" + data + "</pre>");
     }).fail(function (data) {
-        alert("error: " + data);
+        console.log("error..... ", data.responseText)
+        alert("error: " + data.responseText);
     });
 }
 
