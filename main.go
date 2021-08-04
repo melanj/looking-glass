@@ -19,19 +19,38 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
+type ServerConfig struct {
+	ClientID string `json:"client-id"`
+	ClientSecret string `json:"client-secret"`
+	RedirectURL  string  `json:"redirect-url"`
+	SigningKey string  `json:"signing-key"`
+}
+
 var (
-	config = oauth2.Config{
-		ClientID:     "<client_id>",
-		ClientSecret: "<client_secret>",
-		Scopes:       []string{"all"},
-		RedirectURL:  "http://localhost:8080/login.html",
-		Endpoint: github.Endpoint,
-	}
+	oauthConfig *oauth2.Config
+	config *ServerConfig
 )
 
 func main() {
+	configData, err := ioutil.ReadFile("config.json")
 
-	signingKey := []byte("secret")
+	if err != nil {
+		panic(err)
+	}
+
+	if err := json.Unmarshal(configData, &config); err != nil {
+		panic(err)
+	}
+
+	oauthConfig = &oauth2.Config {
+		ClientID:     config.ClientID,
+		ClientSecret: config.ClientSecret,
+		Scopes:       []string{"all"},
+		RedirectURL:  config.RedirectURL,
+		Endpoint: github.Endpoint,
+	}
+
+	signingKey := []byte(config.SigningKey)
 
 	fmt.Println("Looking Glass for FRRouting/Quagga v.1")
 	e := echo.New()
@@ -59,7 +78,11 @@ func authorize(c echo.Context) error {
 
 	code := c.QueryParam("code")
 
-	oauthToken, err := config.Exchange(context.Background(), code)
+	if config == nil || oauthConfig == nil {
+		return echo.ErrUnauthorized
+	}
+
+	oauthToken, err := oauthConfig.Exchange(context.Background(), code)
 	if err != nil {
 		return echo.ErrUnauthorized
 	}
@@ -88,7 +111,7 @@ func authorize(c echo.Context) error {
 	claims["admin"] = false
 	claims["exp"] = time.Now().Add(time.Hour * 4).Unix()
 
-	t, err := token.SignedString([]byte("secret"))
+	t, err := token.SignedString([]byte(config.SigningKey))
 	if err != nil {
 		return err
 	}
