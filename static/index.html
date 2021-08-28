@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
     <script src="config.js"></script>
     <script src="main.js"></script>
 </head>
@@ -27,33 +28,36 @@
         </ul>
         <div id="ping">
             <p>Shows how long it takes for packets to reach host</p>
-            <p>IP : <input type="textbox" value="" id="ping_ip"></p>
-            <button class="ui-button ui-widget ui-corner-all" id="ping_cmd">Go</button>
+            <form id="ping_form" action="#">
+                <p>IP : <input type="textbox" value="" id="ping_ip" name="ping_ip"></p>
+                <button class="ui-button ui-widget ui-corner-all" id="ping_cmd">Go</button>
+            </form>
             <p>
                 <span>Results</span>
             <div id="ping_results">
             </div>
-            </p>
         </div>
         <div id="traceroute">
             <p>Traces the route of packets to destination host from our server</p>
-            <p>IP : <input type="textbox" value="" id="traceroute_ip"></p>
-            <button class="ui-button ui-widget ui-corner-all" id="traceroute_cmd">Go</button>
+            <form id="traceroute_form" action="#">
+                <p>IP : <input type="textbox" value="" id="traceroute_ip" name="traceroute_ip"></p>
+                <button class="ui-button ui-widget ui-corner-all" id="traceroute_cmd">Go</button>
+            </form>
             <p>
                 <span>Results</span>
             <div id="traceroute_results">
             </div>
-            </p>
         </div>
         <div id="mtr">
             <p>Mtr is a network diagnostic tool that combines ping and traceroute into one program</p>
-            <p>IP : <input type="textbox" value="" id="mtr_ip"></p>
-            <button class="ui-button ui-widget ui-corner-all" id="mtr_cmd">Go</button>
+            <form id="mtr_form" action="#">
+                <p>IP : <input type="textbox" value="" id="mtr_ip" name="mtr_ip"></p>
+                <button class="ui-button ui-widget ui-corner-all" id="mtr_cmd">Go</button>
+            </form>
             <p>
                 <span>Results</span>
             <div id="mtr_results">
             </div>
-            </p>
         </div>
         <div id="bgpsum">
             <p>Display BGP summary information</p>
@@ -62,27 +66,28 @@
                 <span>Results</span>
             <div id="bgpsum_results">
             </div>
-            </p>
         </div>
         <div id="route">
             <p>BGP routing table entry for given IP address</p>
-            <p>IP : <input type="textbox" value="" id="route_ip"></p>
-            <button class="ui-button ui-widget ui-corner-all" id="route_cmd">Go</button>
+            <form id="route_form" action="#">
+                <p>IP : <input type="textbox" value="" id="route_ip" name="route_ip"></p>
+                <button class="ui-button ui-widget ui-corner-all" id="route_cmd">Go</button>
+            </form>
             <p>
                 <span>Results</span>
             <div id="route_results">
             </div>
-            </p>
         </div>
         <div id="routev6">
             <p>BGP routing table entry for given IPv6 address</p>
-            <p>IP : <input type="textbox" value="" id="routev6_ip"></p>
-            <button class="ui-button ui-widget ui-corner-all" id="routev6_cmd">Go</button>
+            <form id="routev6_form" action="#">
+                <p>IP : <input type="textbox" value="" id="routev6_ip" name="routev6_ip"></p>
+                <button class="ui-button ui-widget ui-corner-all" id="routev6_cmd">Go</button>
+            </form>
             <p>
                 <span>Results</span>
             <div id="routev6_results">
             </div>
-            </p>
         </div>
     </div>
 </div>
